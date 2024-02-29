@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdint.h>
+
+// Define memory addresses for sensor and actuator data
+#define SENSOR_START_ADDR 0x1000
+#define SENSOR_END_ADDR   0x1FFF
+#define ACTUATOR_START_ADDR 0x2000
+#define ACTUATOR_END_ADDR   0x2FFF
+
+// Simulated sensor and actuator data
+volatile uint8_t sensor_data = 0;
+volatile uint8_t actuator_data = 0;
+
+// Function to simulate sensor data generation
+void generate_sensor_data() {
+    while (1) {
+        // Simulate sensor generating data
+        sensor_data = rand() % 256; // Random value between 0 and 255
+        usleep(100000); // Sleep for 100 milliseconds
+    }
+}
+
+// Function to simulate actuator data processing
+void process_actuator_data() {
+    while (1) {
+        // Simulate actuator processing data
+        printf("Actuator received command: %d\n", actuator_data);
+        usleep(200000); // Sleep for 200 milliseconds
+    }
+}
+
+// Function to perform DMA transfer from sensor data to main memory
+void sensor_dma_transfer() {
+    // Simulate DMA transfer from sensor data to memory
+    for (uint32_t addr = SENSOR_START_ADDR; addr <= SENSOR_END_ADDR; addr++) {
+        // Read sensor data and write to memory address
+        // Actual DMA transfer logic would be hardware-dependent
+        // Here, we simply copy sensor_data to memory location
+        *((uint8_t*)addr) = sensor_data;
+    }
+}
+
+// Function to perform DMA transfer from main memory to actuator data
+void actuator_dma_transfer() {
+    // Simulate DMA transfer from memory to actuator data
+    for (uint32_t addr = ACTUATOR_START_ADDR; addr <= ACTUATOR_END_ADDR; addr++) {
+        // Read data from memory address and assign to actuator
+        // Actual DMA transfer logic would be hardware-dependent
+        // Here, we simply copy data from memory to actuator_data
+        actuator_data = *((uint8_t*)addr);
+    }
+}
+
+int main() {
+    // Initialize random number generator
+    srand(time(NULL));
+
+    // Create threads for sensor data generation and actuator data processing
+    pthread_t sensor_thread, actuator_thread;
+    pthread_create(&sensor_thread, NULL, (void*)generate_sensor_data, NULL);
+    pthread_create(&actuator_thread, NULL, (void*)process_actuator_data, NULL);
+
+    // Simulate DMA transfers between sensor, memory, and actuator
+    while (1) {
+        // Perform DMA transfer from sensor to memory
+        sensor_dma_transfer();
+        
+        // Perform DMA transfer from memory to actuator
+        actuator_dma_transfer();
+    }
+
+    return 0;
+}
+
+
